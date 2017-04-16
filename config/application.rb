@@ -22,5 +22,8 @@ module Places
 
     # Do not swallow errors in after_commit/after_rollback callbacks.
     config.active_record.raise_in_transactional_callbacks = true
+
+    # bootstraps mongoid within applications -- like rails console
+    Mongoid.load!('./config/mongoid.yml')
   end
 end
