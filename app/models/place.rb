@@ -39,4 +39,9 @@ class Place
     end
     return results
   end
+
+  def self.find id
+    place = self.collection.find(:_id=>BSON::ObjectId.from_string(id)).first
+    Place.new(place) unless place.nil?
+  end
 end
