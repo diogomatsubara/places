@@ -44,4 +44,13 @@ class Place
     place = self.collection.find(:_id=>BSON::ObjectId.from_string(id)).first
     Place.new(place) unless place.nil?
   end
+
+  def self.all(offset=0, limit=0)
+    results = []
+    self.collection.find.skip(offset).limit(limit).each do |r|
+      results << Place.new(r)
+    end
+    return results
+  end
+
 end
