@@ -25,4 +25,10 @@ class Place
     parsed_hash = JSON.parse(file.read())
     self.collection.insert_many(parsed_hash)
   end
+
+  def self.find_by_short_name name
+    self.collection.find({
+      :address_components=>{:$elemMatch => {:short_name => name}}
+    })
+  end
 end
