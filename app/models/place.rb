@@ -53,4 +53,8 @@ class Place
     return results
   end
 
+  def destroy
+    Place.collection.delete_one(:_id=>BSON::ObjectId.from_string(@id))
+  end
+
 end
