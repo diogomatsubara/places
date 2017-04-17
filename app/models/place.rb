@@ -31,4 +31,12 @@ class Place
       :address_components=>{:$elemMatch => {:short_name => name}}
     })
   end
+
+  def self.to_places items
+    results = []
+    items.each do |i|
+      results << Place.new(i)
+    end
+    return results
+  end
 end
