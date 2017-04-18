@@ -72,4 +72,18 @@ class Place
     query << {:$limit=>limit} unless offset.nil?
     self.collection.find.aggregate(query)
   end
+
+  def self.get_country_names
+    result = self.collection.find.aggregate([
+      {:$unwind=>'$address_components'},
+      {:$project=>
+        {:_id=>1,
+         :long_name=>'$address_components.long_name',
+         :types=>'$address_components.types'
+        }},
+      {:$match=>{:types=>'country'}},
+      {:$group=>{:_id=>'$long_name'}}
+    ])
+    result.to_a.map {|h| h[:_id]}
+  end
 end
