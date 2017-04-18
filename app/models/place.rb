@@ -6,8 +6,10 @@ class Place
     params = params.deep_symbolize_keys()
     @id = params[:_id].to_s
     @address_components = []
-    params[:address_components].each do |address|
-      @address_components << AddressComponent.new(address)
+    if params.key?(:address_components)
+      params[:address_components].each do |address|
+        @address_components << AddressComponent.new(address)
+      end
     end
     @formatted_address = params[:formatted_address]
     @location = Point.new(params[:geometry][:geolocation])
@@ -119,5 +121,9 @@ class Place
           :$maxDistance=>max_meters
        }
       }})
+  end
+
+  def near(max_distance=nil)
+    Place.to_places(Place.near(@location, max_distance))
   end
 end
