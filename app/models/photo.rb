@@ -31,6 +31,12 @@ class Photo
     end
   end
 
+  def self.all(offset=0, limit=nil)
+    result = self.mongo_client.database.fs.find.skip(offset)
+    result = result.limit(limit) unless limit.nil?
+    result.map {|doc| Photo.new(doc)} unless result.nil?
+  end
+
   def self.mongo_client
     Mongoid::Clients.default
   end
