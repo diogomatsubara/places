@@ -12,6 +12,25 @@ class Photo
     end
   end
 
+  def persisted?
+    !@id.nil?
+  end
+
+  def save
+    if !persisted?
+      @contents.rewind
+      gps = EXIFR::JPEG.new(@contents).gps
+      @location = Point.new(:lng=>gps.longitude, :lat=>gps.latitude)
+      description = {}
+      description[:content_type] = "image/jpeg"
+      description[:metadata] = {:location=>@location.to_hash}
+      @contents.rewind
+      grid_file = Mongo::Grid::File.new(@contents.read, description)
+      Photo.mongo_client.database.fs.insert_one(grid_file)
+      @id = grid_file.id.to_s
+    end
+  end
+
   def self.mongo_client
     Mongoid::Clients.default
   end
