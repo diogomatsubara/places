@@ -43,6 +43,18 @@ class Photo
     Photo.new(doc)
   end
 
+  def contents
+    f = Photo.mongo_client.database.fs.find_one(
+      :_id=>BSON::ObjectId.from_string(@id))
+    if f
+      buffer = ""
+      f.chunks.reduce([]) do |x, chunk|
+        buffer << chunk.data.data
+      end
+      return buffer
+    end
+  end
+
   def self.mongo_client
     Mongoid::Clients.default
   end
