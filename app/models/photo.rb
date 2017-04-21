@@ -26,7 +26,7 @@ class Photo
       description[:metadata] = {:location=>@location.to_hash}
       @contents.rewind
       grid_file = Mongo::Grid::File.new(@contents.read, description)
-      Photo.mongo_client.database.fs.insert_one(grid_file)
+      self.class.mongo_client.database.fs.insert_one(grid_file)
       @id = grid_file.id.to_s
     end
   end
@@ -34,17 +34,17 @@ class Photo
   def self.all(offset=0, limit=nil)
     result = self.mongo_client.database.fs.find.skip(offset)
     result = result.limit(limit) unless limit.nil?
-    result.map {|doc| Photo.new(doc)} unless result.nil?
+    result.map {|doc| self.new(doc)} unless result.nil?
   end
 
   def self.find id
     doc = self.mongo_client.database.fs.find(
       :_id=>BSON::ObjectId.from_string(id)).first
-    Photo.new(doc)
+    return doc.nil? ? nil : Photo.new(doc)
   end
 
   def contents
-    f = Photo.mongo_client.database.fs.find_one(
+    f = self.class.mongo_client.database.fs.find_one(
       :_id=>BSON::ObjectId.from_string(@id))
     if f
       buffer = ""
@@ -53,6 +53,11 @@ class Photo
       end
       return buffer
     end
+  end
+
+  def destroy
+    self.class.mongo_client.database.fs.find(
+      :_id=>BSON::ObjectId.from_string(@id)).delete_one
   end
 
   def self.mongo_client
