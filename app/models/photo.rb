@@ -28,6 +28,10 @@ class Photo
       grid_file = Mongo::Grid::File.new(@contents.read, description)
       self.class.mongo_client.database.fs.insert_one(grid_file)
       @id = grid_file.id.to_s
+    else
+      self.class.mongo_client.database.fs.find(
+        :_id=>BSON::ObjectId.from_string(@id)).update_one(
+          :metadata=>{:location=>@location.to_hash})
     end
   end
 
