@@ -60,6 +60,11 @@ class Photo
       :_id=>BSON::ObjectId.from_string(@id)).delete_one
   end
 
+  def find_nearest_place_id max_distance
+    doc = Place.near(@location, max_distance).limit(1).projection(:_id=>1).first
+    return id.nil? ? nil : doc[:_id]
+  end
+
   def self.mongo_client
     Mongoid::Clients.default
   end
