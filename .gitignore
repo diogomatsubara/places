@@ -18,3 +18,5 @@
 
 # Ignore vim swp files
 *.swp
+# Ignore byebug history file
+.byebug_history

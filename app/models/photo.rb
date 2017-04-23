@@ -1,6 +1,6 @@
 class Photo
 
-  attr_accessor :id, :location
+  attr_accessor :id, :location, :place
   attr_writer :contents
 
   def initialize(params={})
@@ -9,6 +9,24 @@ class Photo
       params = params.deep_symbolize_keys
       @id = params[:_id].to_s
       @location = Point.new(params[:metadata][:location])
+      @place = params[:metadata][:place]
+    end
+  end
+
+  def place
+    @place.nil? ? @place : Place.find(@place.to_s)
+  end
+
+  def place=(value)
+    case
+    when value.is_a?(BSON::ObjectId)
+      @place = value
+    when value.is_a?(Place)
+      @place = BSON::ObjectId.from_string(value.id)
+    when value.is_a?(String)
+      @place = BSON::ObjectId.from_string(value)
+    else
+      @place = nil
     end
   end
 
@@ -23,7 +41,8 @@ class Photo
       @location = Point.new(:lng=>gps.longitude, :lat=>gps.latitude)
       description = {}
       description[:content_type] = "image/jpeg"
-      description[:metadata] = {:location=>@location.to_hash}
+      description[:metadata] = {
+        :location=>@location.to_hash, :place=>@place}
       @contents.rewind
       grid_file = Mongo::Grid::File.new(@contents.read, description)
       self.class.mongo_client.database.fs.insert_one(grid_file)
@@ -31,7 +50,7 @@ class Photo
     else
       self.class.mongo_client.database.fs.find(
         :_id=>BSON::ObjectId.from_string(@id)).update_one(
-          :metadata=>{:location=>@location.to_hash})
+          :metadata=>{:location=>@location.to_hash, :place=>@place})
     end
   end
 
