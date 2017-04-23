@@ -88,6 +88,11 @@ class Photo
     return id.nil? ? nil : doc[:_id]
   end
 
+  def self.find_photos_for_place place_id
+    self.mongo_client.database.fs.find(
+      :"metadata.place"=>BSON::ObjectId.from_string(place_id.to_s))
+  end
+
   def self.mongo_client
     Mongoid::Clients.default
   end
