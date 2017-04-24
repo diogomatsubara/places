@@ -1,4 +1,5 @@
 class Place
+  include ActiveModel::Model
 
   attr_accessor :id, :formatted_address, :location, :address_components
 
@@ -53,6 +54,10 @@ class Place
       results << Place.new(r)
     end
     return results
+  end
+
+  def persisted?
+    !@id.nil?
   end
 
   def destroy
